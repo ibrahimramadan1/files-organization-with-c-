@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 #include <string.h>
 #include <sstream>
-#include <stdlib.h>     /* atoi */
+#include <stdlib.h>
 #include <iostream>
 #include <fstream>
 using namespace std;
@@ -24,7 +24,6 @@ istream& operator >> (istream & in,course &obj )
     in>>obj.inst_name;
     cout<<"Enter weeks: ";
     in>>obj.weeks;
-
     return in;
 }
 ostream& operator <<(ostream& out,course obj)
@@ -435,7 +434,10 @@ void courses::save_SK()
     {
         SK a;
         a=s[i];
-        file1.write((char*)&a,sizeof(a));
+        int len=a.inst_name.length();
+        file1.write((char*)&len,sizeof(int));
+        file1.write(a.inst_name.c_str(),len);
+        file1.write((char*)&a.index,sizeof(int));
     }
     file1.close();
     for (int i=0; i<counter3; i++)
@@ -462,8 +464,18 @@ void courses::load_SK()
     counter3=0;
     while(!file1.eof())
     {
+        int len;
+        file1.read((char*)&len,sizeof(int));
+        char* buffer;
+        buffer=new char[len];
+        file1.read(buffer,len);
         SK a;
-        file1.read((char*)&a,sizeof(a));
+        a.inst_name="";
+        for (int i=0;i<len;i++)
+            a.inst_name+=buffer[i];
+        file1.read((char*)&len,sizeof(int));
+        a.index=len;
+        delete[]buffer;
         s[counter2++]=a;
 
     }
@@ -485,7 +497,7 @@ void courses::SK_get_course()
     int i=SK_binarysearch(name);
     if (i==-1)
     {
-        cout<<"not found \n";
+        cout<<"not found \n"<<endl<<endl;
         return;
     }
     else
@@ -552,15 +564,13 @@ void courses::delete_SK_invertedlist(int i)
 }
 void courses::update_SK()
 {
-    string name;
-    cout<<"enter instructor name: ";
-    cin>>name;
-    cout<<"we deleted all "<<name <<" courses"<<endl;
-    int n;
-    cout<<"Enter the no of new courses \n";
-    cin>>n;
-    while (n--)
-        addcourse();
+    SK_get_course();
+    char id[6];
+    cout<<"enter deleted id: ";
+    cin>>id;
+    removecourse(id);
+    cout<<"Enter the data of new course";
+    addcourse();
 }
 int main()
 {
